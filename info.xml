@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<extension key="com.joineryhq.api.contact.subscribe" type="module">
+  <file>subscribe</file>
+  <name>Contact.subscribe API</name>
+  <description>Provides a single API action to create a contact, add the contact to a specific group, and send a confirmation email.</description>
+  <license>GPL-3.0</license>
+  <maintainer>
+    <author>Allen Shaw</author>
+    <email>allen@JoineryHQ.com</email>
+  </maintainer>
+  <releaseDate>2016-08-30</releaseDate>
+  <version>0.1</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.7</ver>
+  </compatibility>
+  <urls>
+    <url desc="documentation">
+      http://github.com/twomice/com.joineryhq.api.contact.subscribe
+    </url>
+  </urls>
+  <comments>Initial development sponsored by Rigpa Australia</comments>
+  <civix>
+    <namespace>CRM/Subscribe</namespace>
+  </civix>
+</extension>
