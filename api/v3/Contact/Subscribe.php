@@ -85,7 +85,10 @@ function civicrm_api3_contact_subscribe($params) {
     
     // Return the created contact.
     $returnValues = array(
-      $contact_result['id'] => $contact_result['values'][0],
+      // Depending on 'sequential' parameter, $contact_result['values'] may
+      // be keyed sequentially or not. Use array_shift() to get the first value
+      // without knowing the keys.
+      $contact_result['id'] => array_shift($contact_result['values']),
     );
     return civicrm_api3_create_success($returnValues, $params, 'Contact', 'subscribe');
   }
@@ -113,6 +116,6 @@ function _civicrm_api3_contact_subscribe_create_contact($api_params) {
       throw new API_Exception('Error creating contact: '. $e->getMessage(), 'api_error');
     }
   }
-  
+
   return $result;
 }
