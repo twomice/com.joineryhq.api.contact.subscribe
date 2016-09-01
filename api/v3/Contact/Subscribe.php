@@ -37,61 +37,68 @@ function _civicrm_api3_contact_subscribe_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_contact_subscribe($params) {
+  // Verify dependencies.
+  $result = civicrm_api3('email', 'getactions');
+  if (!in_array('send', $result['values'])) {
+    throw new API_Exception('The Contact.subscribe API requires the Email.send API, which is not available. Consider installing the extension at https://civicrm.org/extensions/e-mail-api', 'unmet_dependency');
+  }
+
+  // Check required params.
   if (empty($params['gid'])) {
     throw new API_Exception('Missing or empty required parameter: gid', 'mandatory_missing');
-  } 
-  else {
-    $contact_result = NULL;
+  }
 
-    // Wrap all this in a transaction -- if anything fails, we don't want the
-    // contact hanging around subscribed to nothing, for example.
-    CRM_Core_Transaction::create()->run(function($tx) use ($params, &$contact_result) {
-      
-      $template_id = $params['template_id'];
-      $group_id = $params['gid'];
-      unset($params['mailing_template_id']);
-      unset($params['gid']);
+  // Define a variable to store contact API results.
+  $contact_result = NULL;
 
-      // Create the contact, or find the one identical existing contact.
-      $contact_result = _civicrm_api3_contact_subscribe_create_contact($params);
+  // Wrap all this in a transaction -- if anything fails, we don't want the
+  // contact hanging around subscribed to nothing, for example.
+  CRM_Core_Transaction::create()->run(function($tx) use ($params, &$contact_result) {
 
-      // Add contact to group.
+    $template_id = $params['template_id'];
+    $group_id = $params['gid'];
+    unset($params['mailing_template_id']);
+    unset($params['gid']);
+
+    // Create the contact, or find the one identical existing contact.
+    $contact_result = _civicrm_api3_contact_subscribe_create_contact($params);
+
+    // Add contact to group.
+    $params = array(
+      'contact_id' => $contact_result['id'],
+      'group_id' => $group_id,
+    );
+    try {
+      $result = civicrm_api3('group_contact', 'create', $params);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      throw new API_Exception('Error creating group_contact: '. $e->getMessage(), 'api_error');
+    }
+
+    // Send the email, if template_id is provided.
+    if (!empty($template_id)) {
       $params = array(
+        'sequential' => 1,
         'contact_id' => $contact_result['id'],
-        'group_id' => $group_id,
+        'template_id' => $template_id,
       );
       try {
-        $result = civicrm_api3('group_contact', 'create', $params);
+        $result = civicrm_api3('Email', 'send', $params);
       }
       catch (CiviCRM_API3_Exception $e) {
-        throw new API_Exception('Error creating group_contact: '. $e->getMessage(), 'api_error');
+        throw new API_Exception('Error sending confirmation email: '. $e->getMessage(), 'api_error');
       }
+    }
+  });
 
-      // Send the email, if template_id is provided.
-      if (!empty($template_id)) {
-        $params = array(
-          'sequential' => 1,
-          'contact_id' => $contact_result['id'],
-          'template_id' => $template_id,
-        );
-        try {
-          $result = civicrm_api3('Email', 'send', $params);
-        }
-        catch (CiviCRM_API3_Exception $e) {
-          throw new API_Exception('Error sending confirmation email: '. $e->getMessage(), 'api_error');
-        }
-      }
-    });
-    
-    // Return the created contact.
-    $returnValues = array(
-      // Depending on 'sequential' parameter, $contact_result['values'] may
-      // be keyed sequentially or not. Use array_shift() to get the first value
-      // without knowing the keys.
-      $contact_result['id'] => array_shift($contact_result['values']),
-    );
-    return civicrm_api3_create_success($returnValues, $params, 'Contact', 'subscribe');
-  }
+  // Return the created contact.
+  $returnValues = array(
+    // Depending on 'sequential' parameter, $contact_result['values'] may
+    // be keyed sequentially or not. Use array_shift() to get the first value
+    // without knowing the keys.
+    $contact_result['id'] => array_shift($contact_result['values']),
+  );
+  return civicrm_api3_create_success($returnValues, $params, 'Contact', 'subscribe');
 }
 
 /**
