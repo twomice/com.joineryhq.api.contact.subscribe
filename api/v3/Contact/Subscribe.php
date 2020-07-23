@@ -72,7 +72,7 @@ function civicrm_api3_contact_subscribe($params) {
       $result = civicrm_api3('group_contact', 'create', $params);
     }
     catch (CiviCRM_API3_Exception $e) {
-      throw new API_Exception('Error creating group_contact: '. $e->getMessage(), 'api_error');
+      throw new API_Exception('Error creating group_contact: ' . $e->getMessage(), 'api_error');
     }
 
     // Send the email, if template_id is provided.
@@ -86,7 +86,7 @@ function civicrm_api3_contact_subscribe($params) {
         $result = civicrm_api3('Email', 'send', $params);
       }
       catch (CiviCRM_API3_Exception $e) {
-        throw new API_Exception('Error sending confirmation email: '. $e->getMessage(), 'api_error');
+        throw new API_Exception('Error sending confirmation email: ' . $e->getMessage(), 'api_error');
       }
     }
   });
@@ -112,7 +112,7 @@ function _civicrm_api3_contact_subscribe_create_contact($api_params) {
     $result = civicrm_api3('contact', 'get', $api_params);
   }
   catch (CiviCRM_API3_Exception $e) {
-    throw new API_Exception('Error checking for existing contact: '. $e->getMessage(), 'api_error');
+    throw new API_Exception('Error checking for existing contact: ' . $e->getMessage(), 'api_error');
   }
 
   if ($result['count'] != 1) {
@@ -120,7 +120,7 @@ function _civicrm_api3_contact_subscribe_create_contact($api_params) {
       $result = civicrm_api3('contact', 'create', $api_params);
     }
     catch (CiviCRM_API3_Exception $e) {
-      throw new API_Exception('Error creating contact: '. $e->getMessage(), 'api_error');
+      throw new API_Exception('Error creating contact: ' . $e->getMessage(), 'api_error');
     }
   }
 
