@@ -12,7 +12,7 @@
   <version>0.2</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.7</ver>
+    <ver>5.51</ver>
   </compatibility>
   <urls>
     <url desc="documentation">
@@ -22,5 +22,13 @@
   <comments>Initial development sponsored by Rigpa Australia</comments>
   <civix>
     <namespace>CRM/Subscribe</namespace>
+    <format>25.10.2</format>
   </civix>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
+  <mixins>
+    <mixin>scan-classes@1.0.0</mixin>
+  </mixins>
 </extension>
